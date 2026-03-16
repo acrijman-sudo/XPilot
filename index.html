@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experiments Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --page-bg:   #f3f4f6;
+  --white:     #ffffff;
+  --panel-bg:  #ffffff;
+  --row-div:   #f3f4f6;
+  --border:    #e5e7eb;
+  --border2:   #d1d5db;
+  --txt:       #111827;
+  --muted:     #6b7280;
+  --dim:       #9ca3af;
+  --placeholder: #9ca3af;
+  --blue:      #3b82f6;
+  --blue-s:    rgba(59,130,246,.08);
+  --blue-glow: rgba(59,130,246,.18);
+  --green:     #22c55e;
+  --green-s:   rgba(34,197,94,.08);
+  --orange:    #f97316;
+  --orange-s:  rgba(249,115,22,.08);
+  --red:       #ef4444;
+  --purple:    #8b5cf6;
+  --purple-s:  rgba(139,92,246,.08);
+  --ai:        #6366f1;
+  --ai-s:      rgba(99,102,241,.08);
+  --ai-glow:   rgba(99,102,241,.18);
+  --sans: 'Inter', -apple-system, sans-serif;
+  --filter-w: 248px;
+}
+html,body{height:100%;background:var(--page-bg);color:var(--txt);font-family:var(--sans);font-size:13px;overflow:hidden;}
+.shell{display:flex;height:100vh;flex-direction:column;overflow:hidden;}
+.topbar{height:48px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:8px;flex-shrink:0;z-index:50;}
+.tb-title{font-size:16px;font-weight:600;color:var(--txt);letter-spacing:-.2px;margin-right:auto;}
+.tb-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:var(--white);color:var(--muted);font-family:var(--sans);font-size:12px;font-weight:400;cursor:pointer;transition:border-color .12s,color .12s;white-space:nowrap;}
+.tb-btn:hover{border-color:var(--border2);color:var(--txt);}
+.tb-btn svg{width:13px;height:13px;flex-shrink:0;}
+.tb-ai{display:inline-flex;align-items:center;gap:7px;padding:5px 13px 5px 10px;border-radius:8px;border:1px solid transparent;background:linear-gradient(var(--white),var(--white)) padding-box,linear-gradient(135deg,#818cf8,#a78bfa,#c084fc) border-box;color:#6366f1;font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .18s;position:relative;box-shadow:0 1px 4px rgba(99,102,241,.12);letter-spacing:.01em;}
+.tb-ai:hover{background:linear-gradient(135deg,#6366f1,#8b5cf6,#a855f7) padding-box,linear-gradient(135deg,#818cf8,#a78bfa,#c084fc) border-box;color:#fff;box-shadow:0 2px 10px rgba(99,102,241,.35);}
+.tb-ai-badge{font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);color:#818cf8;font-family:monospace;margin-left:2px;}
+.body-row{display:flex;flex:1;min-height:0;overflow:hidden;}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
+.fbar{display:flex;flex-direction:column;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;}
+.fbar-row{display:flex;align-items:center;gap:6px;padding:8px 16px;}
+.fbar-row-2{overflow:hidden;max-height:0;padding-top:0;padding-bottom:0;border-top:0 solid var(--border);transition:max-height .2s,padding .2s,border-top-width .2s;}
+.fbar-row-2.open{max-height:60px;padding-top:7px;padding-bottom:7px;border-top:1px solid var(--border);}
+.fbar-div{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 2px;}
+.fbar-title{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-family:var(--sans);cursor:pointer;}
+.env-sel{padding:3px 22px 3px 8px;border-radius:5px;border:1px solid var(--border);background:var(--white);font-family:var(--sans);font-size:12px;color:var(--txt);cursor:pointer;}
+.fbar-sp{flex:1;}
+.fbar-clearbtn{font-size:11.5px;color:var(--dim);padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:var(--white);cursor:pointer;}
+.fp-select{padding:5px 24px 5px 9px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-family:var(--sans);font-size:12px;color:var(--txt);cursor:pointer;}
+.fbar-title.on{color:var(--txt);border-color:var(--border2);background:#f9fafb;}
+.fp-search{display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:6px;background:var(--white);padding:5px 10px;width:200px;}
+.fp-search input{flex:1;border:none;outline:none;background:none;font-family:var(--sans);font-size:12px;color:var(--txt);}
+.ai-wrap{display:flex;align-items:center;border:1px solid var(--border2);border-radius:6px;background:var(--white);overflow:hidden;}
+.ai-wrap.open{width:320px;border-color:var(--ai);box-shadow:0 0 0 3px var(--ai-glow);}
+.ai-btn{display:flex;align-items:center;gap:6px;padding:5px 11px;border:none;background:none;color:var(--muted);font-family:var(--sans);font-size:12px;cursor:pointer;}
+.ai-inline-input{flex:1;min-width:0;max-width:0;overflow:hidden;opacity:0;transition:max-width .22s,opacity .18s;}
+.ai-wrap.open .ai-inline-input{max-width:260px;opacity:1;padding:0 8px 0 0;border-left:1px solid var(--border);}
+.ai-inline-input input{flex:1;border:none;outline:none;background:none;font-family:var(--sans);font-size:12px;}
+.tbl-wrap{flex:1;overflow-y:auto;background:var(--white);}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 16px;font-size:11.5px;font-weight:500;color:var(--muted);border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:3;}
+tbody tr{border-bottom:1px solid var(--row-div);cursor:pointer;}
+tbody tr:hover{background:#fafafa;}
+tbody td{padding:10px 16px;}
+.exp-id{font-size:12.5px;color:var(--blue);text-decoration:none;}
+.exp-name{font-size:12.5px;color:var(--txt);}
+.exp-date{font-size:12.5px;color:var(--muted);}
+.status{display:inline-flex;align-items:center;gap:6px;}
+.sdot{width:7px;height:7px;border-radius:50%;}
+.s-active{color:var(--green);}.s-active .sdot{background:var(--green);}
+.s-scheduled{color:var(--blue);}.s-scheduled .sdot{background:var(--blue);}
+.s-stopped{color:var(--muted);}.s-stopped .sdot{background:var(--dim);}
+.s-archived{color:var(--dim);}.s-archived .sdot{background:var(--dim);}
+.exp-type{font-size:12.5px;color:var(--txt);}
+.exp-type-warn{font-size:12.5px;color:var(--txt);}
+.exp-type-warn .latency{color:var(--orange);font-weight:500;}
+.h-na{font-size:12.5px;color:var(--dim);}
+.h-info{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);}
+.h-icon{width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
+.act-btn{background:none;border:none;color:var(--dim);cursor:pointer;padding:4px 6px;}
+tbody tr.f-hide{display:none;}
+#sidecar{width:0;overflow:hidden;background:var(--white);border-left:0 solid var(--border);display:flex;flex-direction:column;transition:width .22s;}
+#sidecar.open{width:380px;border-left-width:1px;}
+.sc-head{height:48px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid var(--border);}
+.sc-body{flex:1;overflow-y:auto;}
+.entry{display:flex;flex-direction:column;gap:3px;}
+.e-bubble{padding:9px 12px;border-radius:8px;font-size:12.5px;}
+.entry-ai .e-bubble{background:#f9fafb;border:1px solid var(--border);}
+.entry-user .e-bubble{background:var(--ai);color:#fff;}
+.e-pre{font-size:10px;color:var(--dim);margin-bottom:1px;}
+.e-ai-dot{color:var(--ai);}
+.entry-ai .e-bubble code{font-family:monospace;font-size:11px;background:var(--border);padding:1px 4px;border-radius:3px;color:var(--ai);}
+.suggestions{padding:0 12px 10px;display:flex;flex-wrap:wrap;gap:5px;}
+.sug{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11.5px;color:var(--muted);cursor:pointer;}
+.sug:hover{border-color:var(--ai);color:var(--ai);background:var(--ai-s);}
+.sc-foot{border-top:1px solid var(--border);background:#fafafa;padding:10px 12px;}
+.modes{display:flex;gap:2px;border:1px solid var(--border);border-radius:6px;background:var(--white);padding:2px;margin-bottom:8px;}
+.mmode{flex:1;padding:4px 0;border-radius:4px;border:none;background:none;color:var(--dim);font-family:var(--sans);font-size:11.5px;cursor:pointer;}
+.mmode.on{background:#f3f4f6;color:var(--txt);font-weight:500;}
+.sc-meta{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--dim);}
+.kbd{background:#f3f4f6;border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:monospace;font-size:9px;}
+.ibox{flex:1;display:flex;align-items:flex-end;gap:5px;background:var(--white);border:1px solid var(--border);border-radius:6px;padding:7px 9px;}
+.send-btn{width:28px;height:28px;border-radius:5px;background:var(--ai);border:none;color:#fff;font-size:14px;cursor:pointer;}
+.typing-bbl{display:inline-flex;align-items:center;gap:3px;background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 14px;}
+.td{width:4px;height:4px;border-radius:50%;background:var(--dim);animation:tdot 1.2s infinite;}
+.td:nth-child(2){animation-delay:.2s;}.td:nth-child(3){animation-delay:.4s;}
+@keyframes tdot{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
+#pill{position:fixed;z-index:9999;display:none;}
+.pill-ask,.pill-add{padding:6px 11px;border:none;background:none;cursor:pointer;font-family:var(--sans);}
+#sc-dim{position:fixed;inset:0;z-index:98;background:rgba(0,0,0,0);pointer-events:none;}
+#sc-dim.on{background:rgba(0,0,0,.18);pointer-events:all;}
+.sc-inner{width:380px;display:flex;flex-direction:column;height:100%;}
+</style>
+</head>
+<body>
+<div id="sc-dim"></div>
+<div id="pill"><button class="pill-ask" id="pill-ask">✦ Ask AI</button><button class="pill-add" id="pill-add">＋</button></div>
+<div class="shell">
+  <div class="topbar">
+    <div class="tb-title">Experiments Dashboard</div>
+    <button class="tb-btn">Documentation</button>
+    <button class="tb-btn">Schedule calendar</button>
+    <button class="tb-btn">Reporting</button>
+    <button class="tb-ai" id="ai-trigger"><span id="trigger-lbl">XPilot</span><span class="tb-ai-badge">⌘K</span></button>
+  </div>
+  <div class="body-row">
+    <div class="main">
+      <div class="fbar">
+        <div class="fbar-row fbar-row-1">
+          <select class="env-sel"><option>prod</option><option>stage</option><option>dev</option></select>
+          <div class="fbar-div"></div>
+          <button class="fbar-title" id="fbar-toggle">Filters</button>
+          <div class="fp-search"><input type="text" placeholder="Type to search" id="classic-search"/></div>
+          <div class="ai-wrap" id="ai-wrap">
+            <button class="ai-btn" id="ai-search-btn">AI</button>
+            <div class="ai-inline-input" id="ai-inline-input"><input type="text" id="ai-input" placeholder="e.g. active experiments with issues…"/><button class="ai-inline-clear" id="ai-clear">✕</button></div>
+          </div>
+          <span class="fbar-sp"></span>
+          <button class="fbar-clearbtn" id="fp-clearbtn">Clear filters</button>
+        </div>
+        <div class="fbar-row fbar-row-2">
+          <select class="fp-select"><option>Status: All</option></select>
+          <select class="fp-select"><option>Type: All</option></select>
+          <select class="fp-select"><option>Team: All</option></select>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Id</th><th>Name</th><th>Modified</th><th>Type</th><th>Team</th><th>Status</th><th>Health</th><th></th></tr></thead>
+          <tbody id="tbody">
+            <tr><td><a class="exp-id">ae6170b</a></td><td><div class="exp-name">Test | Recent Uploads on Home</div></td><td class="exp-date">Mon Mar 09 2026</td><td><span class="exp-type-warn">Multi-Variant test <span class="latency">high latency</span></span></td><td class="exp-team">Engagement</td><td><span class="status s-scheduled"><span class="sdot"></span>Scheduled</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">37bf097</a></td><td><div class="exp-name">Express Template Browse AB – ML Ranker for Browse</div></td><td class="exp-date">Mon Mar 09 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Content Discovery</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">34206b6</a></td><td><div class="exp-name">Test | Apply Filter CBT (Relaunch)</div></td><td class="exp-date">Mon Mar 09 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Engagement</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">5c54b2c</a></td><td><div class="exp-name">Test Business playbooks</div></td><td class="exp-date">Mon Mar 09 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Schedule</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">fdff8e1</a></td><td><div class="exp-name">Test | Recent Uploads at Your Fingertips</div></td><td class="exp-date">Mon Mar 09 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Engagement</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">e9248ae</a></td><td><div class="exp-name">CR Lock Unlock in HUD</div></td><td class="exp-date">Sat Mar 07 2026</td><td><span class="exp-type">Multi-Variant test</span></td><td class="exp-team">Controlled Re-Use</td><td><span class="status s-scheduled"><span class="sdot"></span>Scheduled</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">53e4309</a></td><td><div class="exp-name">Select where remixed file is stored test</div></td><td class="exp-date">Fri Mar 06 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Productivity</td><td><span class="status s-scheduled"><span class="sdot"></span>Scheduled</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">35e3156</a></td><td><div class="exp-name">Test | Contextual Plus Menu</div></td><td class="exp-date">Thu Mar 05 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Engagement</td><td><span class="status s-stopped"><span class="sdot"></span>Stopped</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">18ca7e1</a></td><td><div class="exp-name">Test|Search|Query_search_suggestions_...</div></td><td class="exp-date">Thu Mar 05 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Engagement</td><td><span class="status s-stopped"><span class="sdot"></span>Stopped</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">9eb3ef1</a></td><td><div class="exp-name">Simplify groups M2 Test | Auto-flatten nested templates and pilot EOL nesting</div></td><td class="exp-date">Wed Mar 04 2026</td><td><span class="exp-type">Multi-Variant test</span></td><td class="exp-team">Layout</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">66baf23</a></td><td><div class="exp-name">Test | QA NBA (Resize)</div></td><td class="exp-date">Wed Mar 04 2026</td><td><span class="exp-type">Multi-Variant test</span></td><td class="exp-team">Engagement</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">dc2eb8b</a></td><td><div class="exp-name">tst-user-context</div></td><td class="exp-date">Wed Mar 04 2026</td><td><span class="exp-type">A/A test</span></td><td class="exp-team">Experimentation Platform</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">c0fcc8c</a></td><td><div class="exp-name">Test | QA | Contextual recommendations on Remove Background</div></td><td class="exp-date">Wed Mar 04 2026</td><td><span class="exp-type">Multi-Variant test</span></td><td class="exp-team">Engagement</td><td><span class="status s-stopped"><span class="sdot"></span>Stopped</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">37be016</a></td><td><div class="exp-name">Test | CBT Multi-CTA</div></td><td class="exp-date">Tue Mar 03 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Engagement</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">e28b231</a></td><td><div class="exp-name">Test|Search|Query_search_suggestions_...</div></td><td class="exp-date">Tue Mar 03 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Engagement</td><td><span class="status s-stopped"><span class="sdot"></span>Stopped</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">bc80b1f</a></td><td><div class="exp-name">Project Banana-Split Phase 1 Experiment</div></td><td class="exp-date">Tue Mar 03 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Imaging Intelligence</td><td><span class="status s-active"><span class="sdot"></span>Active</span></td><td><span class="h-info"><i class="h-icon">i</i>Info</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">b76aaba</a></td><td><div class="exp-name">Experiment | Resize without default Expand</div></td><td class="exp-date">Mon Mar 02 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Layout</td><td><span class="status s-archived"><span class="sdot"></span>Archived</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+            <tr><td><a class="exp-id">cca1940</a></td><td><div class="exp-name">(A/B test) Improved asset preview Phase 2 – Design variations in More</div></td><td class="exp-date">Mon Mar 02 2026</td><td><span class="exp-type">A/B test</span></td><td class="exp-team">Content Discovery</td><td><span class="status s-stopped"><span class="sdot"></span>Stopped</span></td><td><span class="h-na">N/A</span></td><td><button class="act-btn">···</button></td></tr>
+          </tbody>
+        </table>
+        <div class="no-results" id="no-results">No experiments match</div>
+      </div>
+    </div>
+    <div id="sidecar">
+      <div class="sc-inner">
+        <div class="sc-head"><div class="sc-name">XPilot</div><button class="sc-hbtn" id="sc-close">✕</button></div>
+        <div class="sc-body" id="sc-body">
+          <div class="thread" id="thread">
+            <div class="entry entry-ai">
+              <div class="e-pre"><span class="e-ai-dot">✦</span> xpilot</div>
+              <div class="e-bubble"><strong>1 active</strong> · <strong>3 scheduled</strong> this week.<br>Health flag on <code>bc80b1f</code> — treatment error rate elevated.<br><br><span style="color:var(--dim);font-size:11.5px">Highlight any text in the table to add context, or ask me anything.</span></div>
+            </div>
+          </div>
+          <div class="suggestions" id="suggestions">
+            <div class="sug" data-msg="walk me through fixing the health warning">🔧 Fix health warning</div>
+            <div class="sug" data-msg="any scheduling conflicts this week?">⚡ Check conflicts</div>
+            <div class="sug" data-msg="summarize active experiments">📊 Summarize active</div>
+          </div>
+        </div>
+        <div class="sc-foot">
+          <div class="modes">
+            <button class="mmode on" data-mode="Ask" data-ph="Ask about your experiments…">Ask</button>
+            <button class="mmode act-mode" data-mode="Act" data-ph="What should XPilot do?">Act</button>
+          </div>
+          <div class="irow"><div class="ibox"><textarea id="ta" placeholder="Ask about your experiments…" rows="1"></textarea><button class="send-btn" id="send-btn">↑</button></div></div>
+          <div class="sc-meta"><span class="sc-meta-l">XPilot · v1</span><span class="sc-meta-r"><span class="kbd">↵</span> send · <span class="kbd">esc</span> close</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const fbarToggle=document.getElementById('fbar-toggle');const fbarRow2=document.querySelector('.fbar-row-2');
+fbarToggle.addEventListener('click',()=>{fbarRow2.classList.toggle('open');fbarToggle.classList.toggle('on',fbarRow2.classList.contains('open'));});
+let scOpen=false;const sc=document.getElementById('sidecar');const dim=document.getElementById('sc-dim');const trigger=document.getElementById('ai-trigger');
+function openSC(){scOpen=true;sc.classList.add('open');trigger.classList.add('open');dim.classList.add('on');}
+function closeSC(){scOpen=false;sc.classList.remove('open');trigger.classList.remove('open');dim.classList.remove('on');}
+trigger.addEventListener('click',()=>scOpen?closeSC():openSC());
+document.getElementById('sc-close').addEventListener('click',closeSC);
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();scOpen?closeSC():openSC();}if(e.key==='Escape'&&scOpen)closeSC();});
+const ctx=[];function addCtx(text){if(ctx.find(c=>c.text===text))return;ctx.push({text,id:Date.now()});}
+function scrollSC(){const b=document.getElementById('sc-body');b.scrollTop=b.scrollHeight;}
+const pill=document.getElementById('pill');let selText='';
+document.addEventListener('mouseup',()=>{const sel=window.getSelection(),text=sel?.toString().trim();if(text?.length>1){selText=text.slice(0,120);const r=sel.getRangeAt(0).getBoundingClientRect();pill.style.cssText='display:flex;left:'+(r.left+r.width/2-65)+'px;top:'+(r.top-42)+'px';}else pill.style.display='none';});
+document.getElementById('pill-ask').addEventListener('click',()=>{if(selText){addCtx(selText);openSC();sendMsg('Tell me about: "'+selText+'"');}pill.style.display='none';window.getSelection()?.removeAllRanges();});
+document.getElementById('pill-add').addEventListener('click',()=>{if(selText){addCtx(selText);openSC();}pill.style.display='none';window.getSelection()?.removeAllRanges();});
+function buildReply(text){
+  const all=(text+' '+ctx.map(c=>c.text).join(' ')).toLowerCase();
+  if(/fix|walk|step|health/.test(all))return'Here\'s how to resolve the health flag on <code>bc80b1f</code>: Open experiment from dashboard → Variants → Pause treatment → Health → fix and re-activate.';
+  if(/conflict|schedul/.test(all))return'<strong>3 scheduled</strong> this week · no blocking conflicts. Safe to run simultaneously.';
+  if(/summar|active/.test(all))return'<strong>1 active</strong> · <strong>3 scheduled</strong> · <strong>9 archived/stopped</strong>. Only active experiment (bc80b1f) has a health flag.';
+  return'Got it. You can ask: Fix health warning · Conflicts this week · Summarize active';
+}
+function sendMsg(text){
+  if(!text?.trim())return;
+  const thread=document.getElementById('thread');
+  document.getElementById('suggestions').style.display='none';
+  const u=document.createElement('div');u.className='entry entry-user';u.innerHTML='<div class="e-bubble">'+text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';thread.appendChild(u);
+  const t=document.createElement('div');t.className='entry entry-ai';t.innerHTML='<div class="e-pre"><span class="e-ai-dot">✦</span> xpilot</div><div class="typing-bbl"><div class="td"></div><div class="td"></div><div class="td"></div></div>';thread.appendChild(t);
+  document.getElementById('ta').value='';scrollSC();
+  setTimeout(()=>{
+    t.remove();
+    const a=document.createElement('div');a.className='entry entry-ai';a.innerHTML='<div class="e-pre"><span class="e-ai-dot">✦</span> xpilot</div><div class="e-bubble">'+buildReply(text)+'</div>';thread.appendChild(a);scrollSC();
+  },700);
+}
+document.querySelectorAll('.sug').forEach(el=>el.addEventListener('click',()=>{openSC();sendMsg(el.getAttribute('data-msg'));}));
+document.querySelectorAll('.mmode').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.mmode').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('ta').placeholder=btn.getAttribute('data-ph');}));
+document.getElementById('send-btn').onclick=()=>sendMsg(document.getElementById('ta').value);
+document.getElementById('ta').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg(e.target.value);}});
+const aiWrap=document.getElementById('ai-wrap');const aiInput=document.getElementById('ai-input');
+aiWrap.querySelector('.ai-btn').addEventListener('click',()=>aiWrap.classList.toggle('open'));
+aiInput.addEventListener('keydown',e=>{if(e.key==='Escape')aiWrap.classList.remove('open');});
+</script>
+</body>
+</html>
